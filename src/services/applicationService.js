@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getItem } from "../utils/storage";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/applications`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/applications`;
 
 // Fallback MongoDB ObjectId (24 hex characters) matching posted applications
 const VALID_24_CHAR_ID = "64b0f1a23c4d5e6f7a8b9c0d";

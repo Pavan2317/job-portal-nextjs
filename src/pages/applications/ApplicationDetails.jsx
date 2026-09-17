@@ -14,7 +14,7 @@ const ApplicationDetails = () => {
     const fetchApplication = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/applications/${id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/applications/${id}`
         );
         setData(res.data);
       } catch (err) {
