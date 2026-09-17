@@ -34,7 +34,7 @@ app.use("/api/applications", applicationRoutes);
 
 // 404 handler for unmatched API routes
 app.use((req, res) => {
-  res.status(404).json({ error: Route not found -\ });
+  res.status(404).json({ error: "Route not found" });
 });
 
 // Connect Database
