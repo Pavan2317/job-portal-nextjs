@@ -1,85 +1,102 @@
 ﻿'use client';
-import { useState, useEffect } from 'react';
 
-export default function BrowseJobs() {
-  const [jobs, setJobs] = useState([]);
-  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { Search, MapPin, Briefcase, Building2, Filter } from 'lucide-react';
 
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/jobs').then((res) => res.json()),
-      fetch('/api/applications').then((res) => res.json())
-    ])
-      .then(([jobsData, appsData]) => {
-        if (Array.isArray(jobsData)) {
-          setJobs(jobsData);
-        } else if (jobsData.jobs && Array.isArray(jobsData.jobs)) {
-          setJobs(jobsData.jobs);
-        } else if (jobsData.data && Array.isArray(jobsData.data)) {
-          setJobs(jobsData.data);
-        } else {
-          setJobs([]);
-        }
+function JobsContent() {
+  const searchParams = useSearchParams();
+  const companyQuery = searchParams.get('company') || '';
+  const searchQuery = searchParams.get('search') || '';
+  const categoryQuery = searchParams.get('category') || '';
 
-        const apps = Array.isArray(appsData) ? appsData : (appsData.applications || appsData.data || []);
-        const appliedIds = new Set(apps.map(app => app.jobId?.toString()));
-        setAppliedJobIds(appliedIds);
-      })
-      .catch((err) => {
-        console.error('Error loading page data:', err);
-      });
-  }, []);
+  const [searchTerm, setSearchTerm] = useState(searchQuery);
+  const [selectedCompany, setSelectedCompany] = useState(companyQuery);
 
-  const handleApply = async (job) => {
-    const res = await fetch('/api/applications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        jobId: job._id, 
-        jobTitle: job.title, 
-        company: job.company 
-      }),
-    });
-    
-    if (res.ok) {
-      alert('Successfully applied!');
-      setAppliedJobIds(prev => new Set(prev).add(job._id.toString()));
-    } else {
-      const errData = await res.json().catch(() => ({}));
-      alert(errData.message || 'Failed to submit application.');
-    }
-  };
+  const allJobs = [
+    { id: 1, title: "React Frontend Developer", company: "Tata Consultancy Services (TCS)", location: "Hyderabad", type: "Full-time", category: "Frontend Developer", exp: "1-2 Years" },
+    { id: 2, title: "Software Engineer", company: "Google", location: "Bangalore", type: "Full-time", category: "Software Engineer", exp: "3-5 Years" },
+    { id: 3, title: "Backend Engineer", company: "Microsoft", location: "Hyderabad", type: "Full-time", category: "Backend Developer", exp: "5+ Years" },
+    { id: 4, title: "Full Stack Developer", company: "Amazon", location: "Chennai", type: "Full-time", category: "Full Stack", exp: "1-2 Years" },
+    { id: 5, title: "Cloud Architect", company: "Google", location: "Bangalore", type: "Full-time", category: "Cloud Engineer", exp: "5+ Years" },
+    { id: 6, title: "UI/UX Designer", company: "Infosys", location: "Pune", type: "Contract", category: "UI UX Designer", exp: "3-5 Years" },
+  ];
+
+  const filteredJobs = allJobs.filter(job => {
+    const matchesSearch = searchTerm === '' || job.title.toLowerCase().includes(searchTerm.toLowerCase()) || job.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCompany = selectedCompany === '' || job.company.toLowerCase().includes(selectedCompany.toLowerCase());
+    const matchesCategory = categoryQuery === '' || job.category.toLowerCase() === categoryQuery.toLowerCase();
+    return matchesSearch && matchesCompany && matchesCategory;
+  });
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Browse Available Jobs</h1>
-        <a href="/dashboard/candidate" className="text-blue-600 underline">Back to Dashboard</a>
-      </div>
-      <div className="space-y-4">
-        {Array.isArray(jobs) && jobs.map((job) => {
-          const isApplied = appliedJobIds.has(job._id.toString());
-          return (
-            <div key={job._id} className="border p-4 rounded shadow bg-white">
-              <h2 className="text-xl font-semibold text-blue-600">{job.title}</h2>
-              <p className="text-gray-600">{job.company} • {job.location}</p>
-              <p className="text-green-600 font-medium my-2">Salary: {job.salary}</p>
-              <button 
-                onClick={() => handleApply(job)} 
-                disabled={isApplied}
-                className={`px-4 py-2 rounded mt-2 transition text-white ${
-                  isApplied ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                {isApplied ? 'Applied' : 'Apply'}
-              </button>
-            </div>
-          );
-        })}
-        {(!Array.isArray(jobs) || jobs.length === 0) && (
-          <p className="text-gray-500">No jobs available right now.</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 py-10 px-4 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-extrabold mb-6">Explore Job Openings</h1>
+
+        {/* Filter / Search Bar */}
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 mb-8 flex flex-col md:flex-row gap-4">
+          <div className="flex-1 flex items-center border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800">
+            <Search className="w-5 h-5 text-gray-400 mr-2" />
+            <input 
+              type="text" 
+              placeholder="Search jobs by title or skill..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-transparent focus:outline-none text-sm text-gray-800 dark:text-gray-200"
+            />
+          </div>
+          <div className="flex-1 flex items-center border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800">
+            <Building2 className="w-5 h-5 text-gray-400 mr-2" />
+            <input 
+              type="text" 
+              placeholder="Filter by company..." 
+              value={selectedCompany}
+              onChange={(e) => setSelectedCompany(e.target.value)}
+              className="w-full bg-transparent focus:outline-none text-sm text-gray-800 dark:text-gray-200"
+            />
+          </div>
+        </div>
+
+        {/* Jobs List */}
+        {filteredJobs.length === 0 ? (
+          <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">No jobs found matching your criteria.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredJobs.map(job => (
+              <div key={job.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{job.title}</h3>
+                    <span className="text-xs bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-semibold px-2.5 py-1 rounded">
+                      {job.type}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">{job.company}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-6">
+                    <span className="flex items-center"><MapPin className="w-3.5 h-3.5 mr-1" /> {job.location}</span>
+                    <span className="flex items-center"><Briefcase className="w-3.5 h-3.5 mr-1" /> {job.exp}</span>
+                  </div>
+                </div>
+                <Link href={`/jobs/${job.id}`} className="inline-block text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+                  View Details
+                </Link>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading jobs...</div>}>
+      <JobsContent />
+    </Suspense>
   );
 }
