@@ -1,98 +1,54 @@
-'use client';
-
-import React from 'react';
+﻿'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ThemeToggle from './ThemeToggle';
-import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState(null);
 
-  const renderAuthButtons = () => {
-    if (!user) {
-      return (
-        <div className="flex items-center space-x-3">
-          <Link href="/login" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Login</Link>
-          <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">Register</Link>
-        </div>
-      );
-    }
+  useEffect(() => {
+    // పేజీ మారినప్పుడు లేదా లోడ్ అయినప్పుడు localStorage నుండి యూజర్ డేటాను వెతుకుతుంది
+    const savedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    setUser(savedUser);
+  }, []);
 
-    return (
-      <div className="flex items-center space-x-4">
-        <span className="text-gray-700 dark:text-gray-200 text-sm font-medium">Welcome</span>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white hover:bg-red-600 px-3 py-1.5 rounded-md text-sm font-medium transition"
-        >
-          Logout
-        </button>
-      </div>
-    );
-  };
-
-  const renderNavigationLinks = () => {
-    if (!user) {
-      return (
-        <>
-          <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</Link>
-          <Link href="/jobs" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Jobs</Link>
-          <Link href="/companies" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Companies</Link>
-        </>
-      );
-    }
-
-    if (user.role === 'candidate') {
-      return (
-        <>
-          <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Home</Link>
-          <Link href="/jobs" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Jobs</Link>
-          <Link href="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Dashboard</Link>
-        </>
-      );
-    }
-
-    if (user.role === 'company') {
-      return (
-        <>
-          <Link href="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Dashboard</Link>
-          <Link href="/jobs-list" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Jobs</Link>
-          <Link href="/applications" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Applications</Link>
-        </>
-      );
-    }
-
-    if (user.role === 'admin') {
-      return (
-        <>
-          <Link href="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Dashboard</Link>
-          <Link href="/jobs-list" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Jobs</Link>
-          <Link href="/companies" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Companies</Link>
-          <Link href="/applications" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">Applications</Link>
-        </>
-      );
-    }
-
-    return null;
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.href = '/login';
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold text-blue-600 dark:text-white">JobPortal</h1>
-          </div>
-          <div className="hidden md:flex items-center space-x-1">
-            {renderNavigationLinks()}
-          </div>
-          <div className="flex items-center space-x-4">
-            <ThemeToggle />
-            {renderAuthButtons()}
-          </div>
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="text-xl font-extrabold text-blue-600 dark:text-blue-500">
+          JobPortal
+        </Link>
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+          <Link href="/" className="hover:text-blue-600">Home</Link>
+          <Link href="/jobs" className="hover:text-blue-600">Jobs</Link>
+          <Link href="/companies" className="hover:text-blue-600">Companies</Link>
+          {user && <Link href="/dashboard" className="hover:text-blue-600">Dashboard</Link>}
+        </nav>
+        
+        <div className="flex items-center gap-4">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">Welcome, {user.name || 'User'}</span>
+              <button 
+                onClick={handleLogout}
+                className="text-sm font-medium text-red-600 hover:underline cursor-pointer"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href="/login" className="px-4 py-2 text-sm font-medium hover:text-blue-600">Login</Link>
+              <Link href="/register" className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow transition">Register</Link>
+            </div>
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
-
