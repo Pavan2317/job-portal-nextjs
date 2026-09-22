@@ -1,7 +1,7 @@
 ﻿import mongoose from 'mongoose';
 
 const ApplicationSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: String, required: false },
   jobId: { type: String, required: true },
   email: { type: String, required: true },
 }, { timestamps: true });

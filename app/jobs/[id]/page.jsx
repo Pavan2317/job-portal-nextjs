@@ -55,16 +55,21 @@ export default function JobDetailPage() {
       description: 'Looking for a passionate developer.'
     });
 
-    // 4. Check if user already applied from database via API
-    if (savedUser && savedUser.id) {
-      fetch(`/api/jobs/apply?userId=${savedUser.id}&jobId=${jobId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.applied) {
-            setHasApplied(true);
-          }
-        })
-        .catch((err) => console.error(err));
+    // 4. Check if user already applied from database via API (checking id, _id, and email)
+    if (savedUser) {
+      const currentUserId = savedUser.id || savedUser._id || '';
+      const currentUserEmail = savedUser.email || '';
+
+      if (currentUserId || currentUserEmail) {
+        fetch(`/api/jobs/apply?userId=${currentUserId}&email=${currentUserEmail}&jobId=${jobId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.applied) {
+              setHasApplied(true);
+            }
+          })
+          .catch((err) => console.error(err));
+      }
     }
   }, [jobId]);
 
@@ -74,23 +79,32 @@ export default function JobDetailPage() {
       return;
     }
 
+    // Fallback to support both .id and ._id stored in localStorage
+    const currentUserId = user.id || user._id;
+
+    if (!currentUserId && !user.email) {
+      alert('User information is missing. Please log in again.');
+      router.push('/login');
+      return;
+    }
+
     try {
       const response = await fetch('/api/jobs/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.id,
+          userId: currentUserId || '',
           jobId: jobId,
-          email: user.email
+          email: user.email || ''
         }),
       });
 
       const data = await response.json();
-      if (data.success) {
+      if (response.ok && data.success) {
         setHasApplied(true);
         setShowPopup(true);
       } else {
-        alert(data.message || 'Something went wrong');
+        alert(data.error || data.message || 'Something went wrong');
       }
     } catch (error) {
       console.error('Error applying for job:', error);

@@ -1,4 +1,8 @@
+import dns from 'dns';
 import mongoose from "mongoose";
+
+// Force public DNS to resolve MongoDB Atlas SRV records locally
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 export const connectDB = async () => {
   try {
