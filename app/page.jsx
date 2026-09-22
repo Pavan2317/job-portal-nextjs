@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Briefcase, Building2, Sun, Moon, Star, ArrowRight, CheckCircle, Smartphone, MapPin } from 'lucide-react';
@@ -11,7 +11,12 @@ export default function Home() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (darkMode) {
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme === 'dark';
+
+    setDarkMode(isDark);
+
+    if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
@@ -19,6 +24,16 @@ export default function Home() {
 
     const savedUser = JSON.parse(localStorage.getItem('user') || 'null');
     setUser(savedUser);
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
   }, [darkMode]);
 
   const popularSearches = ['React Developer', 'Java', 'Python', 'UI Designer', 'Full Stack', 'Data Analyst', 'DevOps', 'Remote Jobs'];
@@ -90,7 +105,27 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 px-6 max-w-7xl mx-auto text-center">
+      <section className="py-16 px-6 max-w-7xl mx-auto text-center relative">
+
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 shadow-sm hover:shadow-md transition"
+          >
+            {darkMode ? (
+              <>
+                <Sun className="w-5 h-5" />
+                White Mode
+              </>
+            ) : (
+              <>
+                <Moon className="w-5 h-5" />
+                Dark Mode
+              </>
+            )}
+          </button>
+        </div>
+
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
           Find your dream job now
         </h1>
@@ -304,3 +339,7 @@ export default function Home() {
     </div>
   );
 }
+
+
+
+
