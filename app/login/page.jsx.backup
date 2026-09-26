@@ -110,59 +110,22 @@ export default function LoginPage() {
           ? 'bg-gray-900 border-gray-800'
           : 'bg-white border-gray-200'
       }`}>
-        <Link
-          href="/"
-          className="font-bold text-xl text-blue-600 dark:text-blue-500"
-        >
+        <Link href="/" className="font-bold text-xl">
           Naukri Clone
         </Link>
 
-        <div className="flex items-center gap-6">
-          <div className={`hidden md:flex items-center gap-6 text-sm font-medium ${
-            isDark ? 'text-gray-300' : 'text-gray-600'
-          }`}>
-            <Link
-              href="/"
-              className="hover:text-blue-600 transition"
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/jobs"
-              className="hover:text-blue-600 transition"
-            >
-              Jobs
-            </Link>
-
-            <Link
-              href="/companies"
-              className="hover:text-blue-600 transition"
-            >
-              Companies
-            </Link>
-          </div>
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={`p-2 rounded-full border ${
-              isDark
-                ? 'border-gray-700 text-gray-200'
-                : 'border-gray-200 text-gray-700'
-            }`}
-            title="Toggle Dark Mode"
-          >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-
-          <Link
-            href="/register"
-            className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow transition"
-          >
-            Register
-          </Link>
-        </div>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className={`p-2 rounded-full border ${
+            isDark
+              ? 'border-gray-700 text-gray-200'
+              : 'border-gray-200 text-gray-700'
+          }`}
+          title="Toggle Dark Mode"
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
       </nav>
 
       <div className="flex items-center justify-center p-6 min-h-[calc(100vh-73px)]">
@@ -246,5 +209,4 @@ export default function LoginPage() {
     </div>
   );
 }
-
 

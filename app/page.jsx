@@ -9,6 +9,15 @@ export default function Home() {
   const [searchExperience, setSearchExperience] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [user, setUser] = useState(null);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTestimonialIndex((prev) => (prev + 1) % testimonials.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -50,10 +59,10 @@ export default function Home() {
   ];
 
   const topCompanies = [
-    { name: 'Google', rating: '4.8', desc: 'Google is a multinational technology company specializing in Internet-related services and products.', openings: '125 current job openings' },
-    { name: 'Microsoft', rating: '4.7', desc: 'Microsoft develops, manufactures, licenses, supports, and sells computer software, consumer electronics, and personal computers.', openings: '98 current job openings' },
-    { name: 'Amazon', rating: '4.5', desc: 'Amazon is an American multinational technology company focusing on e-commerce, cloud computing, and artificial intelligence.', openings: '210 current job openings' },
-    { name: 'Infosys', rating: '4.3', desc: 'Infosys is an Indian multinational information technology company that provides business consulting, information technology and outsourcing services.', openings: '75 current job openings' },
+    { name: 'Google', logo: '/company-logos/google.png', rating: '4.8', desc: 'Google is a multinational technology company specializing in Internet-related services and products.', openings: '125 current job openings' },
+    { name: 'Microsoft', logo: '/company-logos/microsoft.png', rating: '4.7', desc: 'Microsoft develops, manufactures, licenses, supports, and sells computer software, consumer electronics, and personal computers.', openings: '98 current job openings' },
+    { name: 'Amazon', logo: '/company-logos/amazon.png', rating: '4.5', desc: 'Amazon is an American multinational technology company focusing on e-commerce, cloud computing, and artificial intelligence.', openings: '210 current job openings' },
+    { name: 'Infosys', logo: '/company-logos/infosys.png', rating: '4.3', desc: 'Infosys is an Indian multinational information technology company that provides business consulting, information technology and outsourcing services.', openings: '75 current job openings' },
   ];
 
   const testimonials = [
@@ -107,24 +116,6 @@ export default function Home() {
       {/* Hero Section */}
       <section className="py-16 px-6 max-w-7xl mx-auto text-center relative">
 
-        <div className="flex justify-end mb-6">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 shadow-sm hover:shadow-md transition"
-          >
-            {darkMode ? (
-              <>
-                <Sun className="w-5 h-5" />
-                White Mode
-              </>
-            ) : (
-              <>
-                <Moon className="w-5 h-5" />
-                Dark Mode
-              </>
-            )}
-          </button>
-        </div>
 
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
           Find your dream job now
@@ -240,8 +231,19 @@ export default function Home() {
           {topCompanies.map((comp, idx) => (
             <div key={idx} className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center p-2">
+                    <img
+                      src={comp.logo}
+                      alt={`${comp.name} logo`}
+                      className={`object-contain ${comp.name === 'Google' ? 'w-8 h-8' : 'w-10 h-10'}`}
+                    />
+                  </div>
                   <h3 className="text-xl font-bold">{comp.name}</h3>
+                </div>
+
+                <div className="flex justify-between items-start mb-3">
+                  <div></div>
                   <span className="flex items-center gap-1 text-amber-500 text-sm font-semibold bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-lg">
                     <Star className="w-4 h-4 fill-amber-500" /> {comp.rating} rating
                   </span>
@@ -262,18 +264,42 @@ export default function Home() {
       {/* Testimonials */}
       <section className="py-12 px-6 max-w-7xl mx-auto">
         <h2 className="text-2xl font-bold mb-8 text-center">What Our Users Say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map((t, idx) => (
-            <div key={idx} className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-6">{t.text}</p>
-              <div>
-                <h4 className="font-bold text-sm">{t.name}</h4>
-                <p className="text-xs text-gray-500">{t.role}</p>
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-700 ease-in-out"
+            style={{
+              transform: `translateX(-${testimonialIndex * 100}%)`,
+            }}
+          >
+            {testimonials.map((t, idx) => (
+              <div key={idx} className="min-w-full px-2">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between min-h-[180px]">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 italic mb-6">
+                    {t.text}
+                  </p>
+
+                  <div>
+                    <h4 className="font-bold text-sm">{t.name}</h4>
+                    <p className="text-xs text-gray-500">{t.role}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </section>
+
+        <div className="flex justify-center gap-2 mt-5">
+          {testimonials.map((_, idx) => (
+            <span
+              key={idx}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                idx === testimonialIndex
+                  ? 'bg-blue-600 w-5'
+                  : 'bg-gray-300 dark:bg-gray-700 w-2'
+              }`}
+            />
+          ))}
+        </div>      </section>
 
       {/* Mobile App Download Banner */}
       <section className="py-16 px-6 max-w-7xl mx-auto">
@@ -339,6 +365,15 @@ export default function Home() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
 
 
 
